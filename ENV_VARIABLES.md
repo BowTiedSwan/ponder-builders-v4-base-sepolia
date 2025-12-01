@@ -9,14 +9,20 @@ This document describes all environment variables used by the Builders V4 indexe
 - **Format**: `postgresql://username:password@host:port/database?sslmode=require`
 - **Description**: PostgreSQL connection string for the production database
 - **Example**: `postgresql://user:pass@db.example.com:25060/builders_v4_db?sslmode=require`
-- **Source**: Provided by DigitalOcean Managed Database or App Platform database component
+- **Source**: Provided by DigitalOcean Managed Database, Railway PostgreSQL, or App Platform database component
+- **Shared Database Support**: ✅ You can use the **same `DATABASE_URL`** across multiple indexer apps! Each app uses a different `DATABASE_SCHEMA` to isolate data. See [SHARED_DATABASE_SETUP.md](./SHARED_DATABASE_SETUP.md) for details.
 
 ### `DATABASE_SCHEMA`
 - **Type**: String
-- **Description**: Unique database schema name per deployment. Used for zero-downtime deployments.
+- **Description**: Unique database schema name per deployment/app. Used for data isolation when sharing a database across multiple indexers.
 - **Default**: `builders_v4_prod`
-- **Usage**: In DigitalOcean App Platform, use `$APP_DEPLOYMENT_ID` for automatic schema per deployment
-- **Note**: Each deployment should have a unique schema to isolate data
+- **Usage**: 
+  - **Shared Database**: Use unique schema names per app (e.g., `builders_v4_base_sepolia`, `builders_v4_arbitrum_mainnet`, `builders_v4_base_mainnet`)
+  - **DigitalOcean App Platform**: Use `$APP_DEPLOYMENT_ID` for automatic schema per deployment
+- **Note**: 
+  - ⚠️ Each indexer app **MUST** use a unique schema name when sharing a database
+  - Schemas provide complete data isolation - tables from different schemas don't interfere
+  - See [SHARED_DATABASE_SETUP.md](./SHARED_DATABASE_SETUP.md) for Railway setup guide
 
 ### `PONDER_RPC_URL_84532`
 - **Type**: String
@@ -26,6 +32,12 @@ This document describes all environment variables used by the Builders V4 indexe
 - **Example**: `https://base-sepolia.g.alchemy.com/v2/YOUR_API_KEY`
 
 ## Optional Variables
+
+### `PORT`
+- **Type**: Number
+- **Description**: Port number for the HTTP server. Railway automatically sets this variable.
+- **Default**: `42069` (Ponder's default)
+- **Note**: Railway sets this automatically - your app should use `process.env.PORT` if available
 
 ### `PONDER_LOG_LEVEL`
 - **Type**: String
